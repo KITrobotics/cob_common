@@ -11,13 +11,10 @@
   <!-- angular values from 16 to 36 with the step of 5 Deg -->
   <xacro:property name="telescope_rot_angle_min" value="16" />
   <xacro:property name="telescope_rot_angle_max" value="36" />
-<!--  <xacro:property name="telescope_rot_angle" value="16" />
-  <xacro:property name="telescope_rot_rad" value="${M_PI*telescope_rot_angle/180}" />-->
 
   <!-- linear values from 0.274 to 0.474 with the step of 5 cm -->
   <xacro:property name="telescope_linear_pos_min" value="0.274" />
   <xacro:property name="telescope_linear_pos_max" value="0.424" />
-<!--   <xacro:property name="telescope_linear_pos" value="0.274" /> -->
 
   <xacro:property name="caster_offset_back_x" value="0.210992" />  <!--modify here-->
   <xacro:property name="caster_offset_back_y" value="0.0" />
