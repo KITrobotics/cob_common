@@ -142,12 +142,6 @@
       </collision>-->
     </link>
 
-<!--    <joint name="${name}_bl_chassis_bl_telescope_lin_joint" type="fixed">
-      <origin xyz="${telescope_linear_pos} 0 0" rpy="0 0 0" />
-      <parent link="${name}_baseplate_bl_telescope_rot_link"/>
-      <child link="${name}_baseplate_bl_telescope_lin_link" />
-    </joint>
-    -->
     <joint name="${name}_bl_chassis_bl_telescope_lin_joint" type="prismatic">
       <origin xyz="0 0 0" rpy="0 0 0" />
       <axis xyz="1 0 0" />
@@ -155,12 +149,6 @@
       <parent link="${name}_baseplate_bl_telescope_rot_link"/>
       <child link="${name}_baseplate_bl_telescope_lin_link" />
     </joint>
-
-<!--    <joint name="${name}_br_chassis_br_telescope_lin_joint" type="fixed">
-      <origin xyz="${telescope_linear_pos} 0 0" rpy="0 0 0" />
-      <parent link="${name}_baseplate_br_telescope_rot_link"/>
-      <child link="${name}_baseplate_br_telescope_lin_link" />
-    </joint>-->
 
     <joint name="${name}_br_chassis_br_telescope_lin_joint" type="prismatic">
       <origin xyz="0 0 0" rpy="0 0 0" />
