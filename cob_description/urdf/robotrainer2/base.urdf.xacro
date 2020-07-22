@@ -1,0 +1,258 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find cob_description)/urdf/robotrainer2/base.gazebo.xacro" />
+
+  <!-- drive_wheel module -->
+  <xacro:include filename="$(find cob_description)/urdf/drive_wheel/drive_wheel.urdf.xacro" />
+
+<!-- properties -->
+
+  <!-- angular values from 16 to 36 with the step of 5 Deg -->
+  <xacro:property name="telescope_rot_angle_min" value="16" />
+  <xacro:property name="telescope_rot_angle_max" value="36" />
+<!--  <xacro:property name="telescope_rot_angle" value="16" />
+  <xacro:property name="telescope_rot_rad" value="${M_PI*telescope_rot_angle/180}" />-->
+
+  <!-- linear values from 0.274 to 0.474 with the step of 5 cm -->
+  <xacro:property name="telescope_linear_pos_min" value="0.274" />
+  <xacro:property name="telescope_linear_pos_max" value="0.424" />
+<!--   <xacro:property name="telescope_linear_pos" value="0.274" /> -->
+
+  <xacro:property name="caster_offset_back_x" value="0.210992" />  <!--modify here-->
+  <xacro:property name="caster_offset_back_y" value="0.0" />
+  <xacro:property name="caster_offset_back_z" value="-0.1989" />
+
+  <xacro:property name="caster_angoffset_back_yaw" value="${(180-telescope_rot_angle_min)*M_PI/180}" />
+
+  <xacro:property name="caster_offset_front_x" value="0.367032" />  <!--modify here-->
+  <xacro:property name="caster_offset_front_y" value="0" />
+  <xacro:property name="caster_offset_front_z" value="-0.1989" />
+
+  <xacro:property name="base_mass" value="100" />
+
+  <xacro:macro name="base" params="name tricycle_mode:=false forward:=true">
+
+    <xacro:property name="drive_vel" value="19.95" />
+    <xacro:property name="steer_vel" value="12.00" /> <!-- Controller: 10.0, Driver: 12.0, Elmo: 15.0 -->
+
+    <link name="${name}_footprint"/>
+
+    <joint name="${name}_footprint_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${name}_footprint"/>
+      <child link="${name}_link" />
+    </joint>
+
+    <link name="${name}_link"/>
+
+    <xacro:if value="${forward}">
+      <joint name="${name}_baseplate_joint" type="fixed">
+        <origin xyz="0 0 0.2789" rpy="0 0 0" />
+        <parent link="${name}_link"/>
+        <child link="${name}_baseplate_link" />
+      </joint>
+    </xacro:if>
+    <xacro:unless value="${forward}">
+      <joint name="${name}_baseplate_joint" type="fixed">
+        <origin xyz="0 0 0.2789" rpy="0 0 ${M_PI}" />
+        <parent link="${name}_link"/>
+        <child link="${name}_baseplate_link" />
+      </joint>
+    </xacro:unless>
+
+    <link name="${name}_baseplate_link">
+      <inertial>
+        <origin xyz="0 0 0" />
+        <mass value="${base_mass}" />
+        <inertia ixx="5.652232699207" ixy="-0.009719934438" ixz="1.293988226423"
+             iyy="5.669473158652" iyz="-0.007379583694" izz="3.683196351726" />
+      </inertial>
+<!--      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base_collision.stl"/>
+        </geometry>
+      </collision>-->
+    </link>
+
+    <joint name="${name}_baseplate_bl_chassis_joint" type="fixed">
+      <origin xyz="0.250 0.125 0" rpy="0 0 0" />
+      <parent link="${name}_baseplate_link"/>
+      <child link="${name}_baseplate_bl_chassis_link" />
+    </joint>
+
+    <joint name="${name}_baseplate_br_chassis_joint" type="fixed">
+      <origin xyz="0.250 -0.125 0" rpy="0 0 0" />
+      <parent link="${name}_baseplate_link"/>
+      <child link="${name}_baseplate_br_chassis_link" />
+    </joint>
+
+    <link name="${name}_baseplate_bl_chassis_link"/>
+    <link name="${name}_baseplate_br_chassis_link"/>
+
+    <joint name="${name}_bl_chassis_bl_telescope_rot_joint" type="revolute">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <limit lower="${(180-telescope_rot_angle_min)*M_PI/180}" upper="${(180-telescope_rot_angle_max)*M_PI/180}" velocity="0.01" effort="0.01" />
+      <parent link="${name}_baseplate_bl_chassis_link"/>
+      <child link="${name}_baseplate_bl_telescope_rot_link" />
+    </joint>
+
+    <joint name="${name}_br_chassis_br_telescope_rot_joint" type="revolute">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <limit lower="${(180+telescope_rot_angle_min)*M_PI/180}" upper="${(180+telescope_rot_angle_max)*M_PI/180}" velocity="0.01" effort="0.01" />
+      <parent link="${name}_baseplate_br_chassis_link"/>
+      <child link="${name}_baseplate_br_telescope_rot_link" />
+    </joint>
+
+    <link name="${name}_baseplate_br_telescope_rot_link">
+      <xacro:default_inertial />
+<!--      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base_collision.stl"/>
+        </geometry>
+      </collision>-->
+    </link>
+
+    <link name="${name}_baseplate_bl_telescope_rot_link">
+      <xacro:default_inertial />
+<!--      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base_collision.stl"/>
+        </geometry>
+      </collision>-->
+    </link>
+
+<!--    <joint name="${name}_bl_chassis_bl_telescope_lin_joint" type="fixed">
+      <origin xyz="${telescope_linear_pos} 0 0" rpy="0 0 0" />
+      <parent link="${name}_baseplate_bl_telescope_rot_link"/>
+      <child link="${name}_baseplate_bl_telescope_lin_link" />
+    </joint>
+    -->
+    <joint name="${name}_bl_chassis_bl_telescope_lin_joint" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <axis xyz="1 0 0" />
+      <limit lower="${telescope_linear_pos_min}" upper="${telescope_linear_pos_max}" velocity="0.01" effort="0.01" />
+      <parent link="${name}_baseplate_bl_telescope_rot_link"/>
+      <child link="${name}_baseplate_bl_telescope_lin_link" />
+    </joint>
+
+<!--    <joint name="${name}_br_chassis_br_telescope_lin_joint" type="fixed">
+      <origin xyz="${telescope_linear_pos} 0 0" rpy="0 0 0" />
+      <parent link="${name}_baseplate_br_telescope_rot_link"/>
+      <child link="${name}_baseplate_br_telescope_lin_link" />
+    </joint>-->
+
+    <joint name="${name}_br_chassis_br_telescope_lin_joint" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <axis xyz="1 0 0" />
+      <limit lower="${telescope_linear_pos_min}" upper="${telescope_linear_pos_max}" velocity="0.01" effort="0.01" />
+      <parent link="${name}_baseplate_br_telescope_rot_link"/>
+      <child link="${name}_baseplate_br_telescope_lin_link" />
+    </joint>
+
+    <link name="${name}_baseplate_br_telescope_lin_link">
+      <xacro:default_inertial />
+<!--      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base_collision.stl"/>
+        </geometry>
+      </collision>-->
+    </link>
+
+    <link name="${name}_baseplate_bl_telescope_lin_link">
+      <xacro:default_inertial />
+<!--      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://cob_description/meshes/cob4_base/base_collision.stl"/>
+        </geometry>
+      </collision>-->
+    </link>
+
+    <joint name="${name}_baseplate_front_wheel_joint" type="fixed">
+      <origin xyz="${caster_offset_front_x} ${caster_offset_front_y} 0" rpy="0 0 0" />
+      <parent link="${name}_baseplate_link"/>
+      <child link="${name}_baseplate_front_wheel_link" />
+    </joint>
+    <link name="${name}_baseplate_front_wheel_link" />
+
+    <joint name="${name}_baseplate_back_left_wheel_joint" type="fixed">
+      <origin xyz="${caster_offset_back_x} ${caster_offset_back_y} 0" rpy="0 0 ${M_PI}" />
+      <parent link="${name}_baseplate_bl_telescope_lin_link"/>
+      <child link="${name}_baseplate_back_left_wheel_link" />
+    </joint>
+    <link name="${name}_baseplate_back_left_wheel_link" />
+
+    <joint name="${name}_baseplate_back_right_wheel_joint" type="fixed">
+      <origin xyz="${caster_offset_back_x} ${caster_offset_back_y} 0" rpy="0 0 ${M_PI}" />
+      <parent link="${name}_baseplate_br_telescope_lin_link"/>
+      <child link="${name}_baseplate_back_right_wheel_link" />
+    </joint>
+    <link name="${name}_baseplate_back_right_wheel_link" />
+
+
+
+
+<!--     <xacro:unless value="${tricycle_mode}"> -->
+      <xacro:drive_wheel parent="${name}_baseplate_front_wheel_link" suffix="f" >
+        <origin xyz="0 0 ${caster_offset_front_z}" rpy="0 0 0" />
+      </xacro:drive_wheel>
+      <xacro:drive_wheel parent="${name}_baseplate_back_left_wheel_link" suffix="bl" >
+        <origin xyz="0 0 ${caster_offset_back_z}" rpy="0 0 ${-caster_angoffset_back_yaw}" />
+      </xacro:drive_wheel>
+      <xacro:drive_wheel parent="${name}_baseplate_back_right_wheel_link" suffix="br" >
+        <origin xyz="0 0 ${caster_offset_back_z}" rpy="0 0 ${+caster_angoffset_back_yaw}" />
+      </xacro:drive_wheel>
+<!--     </xacro:unless> -->
+
+
+    <!-- gazebo extensions -->
+    <xacro:base_gazebo name="${name}" />
+
+    <!-- ros_control plugin -->
+    <gazebo>
+      <plugin name="ros_control" filename="libhwi_switch_gazebo_ros_control.so">
+        <robotNamespace>${name}</robotNamespace>
+        <filterJointsParam>joint_names</filterJointsParam>
+      </plugin>
+    </gazebo>
+
+  </xacro:macro>
+
+</robot>
